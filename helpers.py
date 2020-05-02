@@ -1,50 +1,47 @@
-from enum import Enum
+def lines(a, b):
+    """Return lines in both a and b"""
+
+    lines_O_a = a.split('\n')
+    lines_O_b = b.split('\n')
+
+    lines_O_a = set(lines_O_a)
+    lines_O_b = set(lines_O_b)
+    common_lines = lines_O_a.intersection(lines_O_b)
+
+    return list(common_lines)
 
 
-class Operation(Enum):
-    """Operations"""
+def sentences(a, b):
+    """Return sentences in both a and b"""
 
-    DELETED = 1
-    INSERTED = 2
-    SUBSTITUTED = 3
+    from nltk.tokenize import sent_tokenize
 
-    def __str__(self):
-        return str(self.name.lower())
+    sentences_O_a = sent_tokenize(a)
+    sentences_O_b = sent_tokenize(b)
+
+    sentences_O_a = set(sentences_O_a)
+    sentences_O_b = set(sentences_O_b)
+    common_sentences = sentences_O_a.intersection(sentences_O_b)
+
+    return list(common_sentences)
 
 
-def distances(a, b):
-    """Calculate edit distance from a to b"""
+def substrings(a, b, n):
+    """Return substrings of length n in both a and b"""
 
-    # initialize the cost matrix
-    cost = [[(0, None) for x in range(len(b) + 1)] for y in range(len(a) + 1)]
+    substrings_O_a = [a[i:i+n] for i in range(len(a)-n+1)]
+    substrings_O_b = [b[j:j+n] for j in range(len(b)-n+1)]
 
-    # base cases
-    for i in range(1, len(a) + 1):
-        cost[i][0] = (i, Operation.DELETED)
+    common_substrings = []
+    if len(substrings_O_a) < len(substrings_O_b):
+        for substring in substrings_O_a:
+            if substring in substrings_O_b:
+                common_substrings.append(substring)
+    else:
+        for substring in substrings_O_b:
+            if substring in substrings_O_a:
+                common_substrings.append(substring)
 
-    for j in range(1, len(b) + 1):
-        cost[0][j] = (j, Operation.INSERTED)
+    common_substrings = set(common_substrings)
 
-    # calculate minimum
-    for i in range(1, len(a) + 1):
-        for j in range(1, len(b) + 1):
-            # cost initialization
-            deletion_cost, _ = cost[i - 1][j]
-            insertion_cost, _ = cost[i][j - 1]
-            substitution_cost, _ = cost[i - 1][j - 1]
-
-            deletion_cost += 1
-            insertion_cost += 1
-
-            # substitution condition if both char are neq.
-            if a[i - 1] != b[j - 1]:
-                substitution_cost += 1
-
-            if deletion_cost <= insertion_cost and deletion_cost <= substitution_cost:
-                cost[i][j] = (deletion_cost, Operation.DELETED)
-            elif insertion_cost <= deletion_cost and insertion_cost <= substitution_cost:
-                cost[i][j] = (insertion_cost, Operation.INSERTED)
-            else:
-                cost[i][j] = (substitution_cost, Operation.SUBSTITUTED)
-
-    return cost
+    return list(common_substrings)
